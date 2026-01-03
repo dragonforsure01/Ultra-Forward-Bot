@@ -4,9 +4,17 @@ RUN apt-get update && apt-get upgrade -y
 RUN apt-get install git -y
 COPY requirements.txt /requirements.txt
 
-RUN cd /
-RUN pip3 install -U pip && pip3 install -U -r requirements.txt
-RUN JishuDeveloper /Ultra-Forward-Bot
+# 1. Go to the root directory
+WORKDIR /
+
+# 2. Correctly clone the repository using the 'git clone' command
+RUN git clone https://github.com/JishuDeveloper/Ultra-Forward-Bot.git
+
+# 3. Move into the folder you just downloaded
 WORKDIR /Ultra-Forward-Bot
+
+# 4. Now install the requirements from inside that folder
+RUN pip3 install -U pip && pip3 install -U -r requirements.txt
+
 COPY start.sh /start.sh
 CMD ["/bin/bash", "/start.sh"] 
