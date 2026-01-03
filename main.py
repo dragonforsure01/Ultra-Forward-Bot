@@ -1,35 +1,32 @@
 import os
-import time
+import threading
 from flask import Flask
-from threading import Thread
 from bot import Bot
 
-# 1. Setup Flask
+# 1. Setup the Web Server
 app_web = Flask(__name__)
 
 @app_web.route('/')
-def home():
-    return "Bot is alive!"
+def health_check():
+    return "Bot is running!", 200
 
-def run_web():
-    # Render assigns a port dynamically. We MUST use os.environ.get('PORT')
-    port = int(os.environ.get("PORT", 8080))
-    print(f"--- Flask is starting on port {port} ---")
-    app_web.run(host='0.0.0.0', port=port)
-
-def keep_alive():
-    t = Thread(target=run_web)
-    t.daemon = True
-    t.start()
-
-# 2. Start Flask FIRST
-if __name__ == "__main__":
-    keep_alive()
-    
-    # Give Flask 2 seconds to bind to the port before starting the bot
-    time.sleep(2) 
-    
+def start_bot():
     print("--- Starting Telegram Bot ---")
-    # Jishu Developer Credits
-    bot_app = Bot()
-    bot_app.run()
+    try:
+        # Credits: JishuDeveloper
+        bot_app = Bot()
+        bot_app.run()
+    except Exception as e:
+        print(f"Bot Error: {e}")
+
+# 2. Main Execution
+if __name__ == "__main__":
+    # Start the bot in a separate background thread
+    bot_thread = threading.Thread(target=start_bot)
+    bot_thread.daemon = True
+    bot_thread.start()
+
+    # Start the Web Server (This keeps Render happy and shows 'Live')
+    port = int(os.environ.get("PORT", 8080))
+    print(f"--- Web Server starting on port {port} ---")
+    app_web.run(host='0.0.0.0', port=port)
